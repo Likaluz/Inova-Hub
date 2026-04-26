@@ -7,7 +7,7 @@ C4Container
     title InovaHub - Nível 2 - Containers
 
     Person(usuario, "Usuário / Participante", "Utiliza cadastro, login por ID, dashboard, ideias, cadastro de missões, conclusão de missões, chat e ranking.")
-    Person(avaliador, "Professor / Avaliador", "Consulta Swagger, README, diagramas e testes.")
+    Person(avaliador, "Gerente", "Consulta Swagger, README, diagramas e testes.")
 
     System_Boundary(inovahub, "InovaHub") {
         Container(frontend, "Frontend Web", "HTML, CSS e JavaScript", "Interface web com tela de cadastro, login por ID, dashboard, ideias, cadastro de missões, conclusão de missões, chat e ranking.")

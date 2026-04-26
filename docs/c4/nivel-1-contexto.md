@@ -7,7 +7,7 @@ C4Context
     title InovaHub - Nível 1 - Contexto
 
     Person(usuario, "Usuário / Participante", "Pessoa que se cadastra, acessa a plataforma pelo ID, envia ideias, conclui missões, usa o chat e acompanha o ranking.")
-    Person(avaliador, "Professor / Avaliador", "Pessoa que consulta o projeto, testa os contratos da API pelo Swagger e valida os requisitos da entrega.")
+    Person(avaliador, "Gerente", "Pessoa que consulta o projeto, testa os contratos da API pelo Swagger e valida os requisitos da entrega.")
 
     System(inovahub, "InovaHub", "Plataforma web de inovação com cadastro, login por ID, ideias, missões, chat, ranking, API documentada e banco SQLite.")
 
