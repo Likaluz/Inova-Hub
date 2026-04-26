@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InovaHub - Login e Cadastro</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a, #111827);
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 980px;
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.35);
+      padding: 32px;
+    }
+
+    .header {
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 36px;
+    }
+
+    .header p {
+      margin: 0;
+      color: #cbd5e1;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .card {
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+
+    .card p {
+      color: #cbd5e1;
+      line-height: 1.5;
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin-top: 16px;
+      margin-bottom: 6px;
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #020617;
+      color: white;
+      outline: none;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: #38bdf8;
+    }
+
+    .btn {
+      margin-top: 18px;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      color: white;
+      background: #16a34a;
+    }
+
+    .btn:hover {
+      opacity: .9;
+    }
+
+    .btn-secondary {
+      background: #0ea5e9;
+    }
+
+    .msg {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+      line-height: 1.4;
+    }
+
+    .ok {
+      background: #14532d;
+      display: block;
+    }
+
+    .erro {
+      background: #7f1d1d;
+      display: block;
+    }
+
+    .info {
+      background: #1e3a8a;
+      display: block;
+    }
+
+    .link-area {
+      margin-top: 24px;
+      color: #cbd5e1;
+    }
+
+    a {
+      color: #38bdf8;
+    }
+
+    code {
+      background: #1f2937;
+      padding: 2px 6px;
+      border-radius: 5px;
+    }
+
+    .small {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    @media (max-width: 820px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="header">
+      <h1>InovaHub</h1>
+      <p>Plataforma de inovação com cadastro, login por ID, ideias, missões, chat e ranking.</p>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Cadastro</h2>
+        <p>Crie um usuário informando nome e e-mail. Após o cadastro, o sistema mostrará o <strong>ID do usuário</strong>. Guarde esse ID para realizar login.</p>
+
+        <form id="cadastroForm">
+          <label for="cadastroNome">Nome</label>
+          <input id="cadastroNome" type="text" placeholder="Exemplo: Lucas Domingues" required />
+
+          <label for="cadastroEmail">E-mail</label>
+          <input id="cadastroEmail" type="email" placeholder="Exemplo: lucas.domingues@fiap.com.br" required />
+
+          <button class="btn" type="submit">Cadastrar usuário</button>
+        </form>
+
+        <div id="cadastroMensagem" class="msg"></div>
+      </div>
+
+      <div class="card">
+        <h2>Login</h2>
+        <p>Entre usando o <strong>ID do usuário</strong> criado no cadastro ou retornado no Swagger pelo endpoint <code>POST /api/users</code>.</p>
+
+        <form id="loginForm">
+          <label for="loginId">ID do usuário</label>
+          <input id="loginId" type="number" min="1" placeholder="Exemplo: 1" required />
+
+          <button class="btn btn-secondary" type="submit">Entrar</button>
+        </form>
+
+        <div id="loginMensagem" class="msg"></div>
+
+        <p class="small" style="margin-top: 18px;">
+          Dica: no Swagger, ao criar um usuário, copie o campo <code>id</code> da resposta e use aqui no login.
+        </p>
+      </div>
+    </section>
+
+    <section class="link-area">
+      Swagger: <a href="/api-docs">/api-docs</a>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = window.location.origin;
+
+    function mostrarMensagem(id, texto, tipo = 'ok') {
+      const el = document.getElementById(id);
+      el.className = 'msg ' + tipo;
+      el.innerHTML = texto;
+    }
+
+    function validarEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    async function buscarUsuarioPorId(id) {
+      const resposta = await fetch(`${API_URL}/api/users`);
+      if (!resposta.ok) {
+        throw new Error('Não foi possível consultar os usuários cadastrados.');
+      }
+
+      const usuarios = await resposta.json();
+      return usuarios.find(usuario => String(usuario.id) === String(id));
+    }
+
+    document.getElementById('cadastroForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const name = document.getElementById('cadastroNome').value.trim();
+      const email = document.getElementById('cadastroEmail').value.trim();
+
+      if (!name) {
+        mostrarMensagem('cadastroMensagem', 'Informe o nome do usuário.', 'erro');
+        return;
+      }
+
+      if (!validarEmail(email)) {
+        mostrarMensagem('cadastroMensagem', 'Informe um e-mail válido. Exemplo: lucas.domingues@fiap.com.br', 'erro');
+        return;
+      }
+
+      try {
+        mostrarMensagem('cadastroMensagem', 'Cadastrando usuário...', 'info');
+
+        const resposta = await fetch(`${API_URL}/api/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name, email })
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+          throw new Error(dados.error || 'Erro ao cadastrar usuário.');
+        }
+
+        localStorage.setItem('inovahubUserId', dados.id);
+        localStorage.setItem('inovahubUserName', dados.name);
+        localStorage.setItem('inovahubPoints', dados.points || 0);
+
+        document.getElementById('loginId').value = dados.id;
+
+        mostrarMensagem(
+          'cadastroMensagem',
+          `Usuário cadastrado com sucesso!<br><br><strong>ID do usuário: ${dados.id}</strong><br>Use esse ID para fazer login.`,
+          'ok'
+        );
+      } catch (erro) {
+        mostrarMensagem('cadastroMensagem', erro.message, 'erro');
+      }
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const id = document.getElementById('loginId').value.trim();
+
+      if (!id) {
+        mostrarMensagem('loginMensagem', 'Informe o ID do usuário.', 'erro');
+        return;
+      }
+
+      try {
+        mostrarMensagem('loginMensagem', 'Verificando usuário...', 'info');
+
+        const usuario = await buscarUsuarioPorId(id);
+
+        if (!usuario) {
+          throw new Error('Usuário não encontrado. Verifique o ID usado no Swagger ou realize um novo cadastro.');
+        }
+
+        localStorage.setItem('inovahubUserId', usuario.id);
+        localStorage.setItem('inovahubUserName', usuario.name);
+        localStorage.setItem('inovahubPoints', usuario.points || 0);
+
+        mostrarMensagem('loginMensagem', 'Login realizado com sucesso. Redirecionando...', 'ok');
+
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 600);
+      } catch (erro) {
+        mostrarMensagem('loginMensagem', erro.message, 'erro');
+      }
+    });
+  </script>
+</body>
+</html>

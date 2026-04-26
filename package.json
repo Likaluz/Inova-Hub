@@ -1,0 +1,12 @@
+{
+  "name": "inovahub-entrega",
+  "version": "1.0.0",
+  "description": "Projeto completo InovaHub com frontend, backend, Swagger, banco, C4 e testes.",
+  "private": true,
+  "scripts": {
+    "postinstall": "npm --prefix backend install",
+    "start": "npm --prefix backend start",
+    "dev": "npm --prefix backend run dev",
+    "test": "npm --prefix backend test"
+  }
+}

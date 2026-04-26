@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InovaHub - Ranking</title>
+    <style>
+      body { font-family: Arial, sans-serif; background:#0f172a; color:#e5e7eb; margin:0; }
+      .container { max-width:900px; margin:40px auto; padding:20px; background:#111827; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,.4); }
+      h1 { margin-top:0; }
+      .btn { background:#22c55e; border:none; color:#022c22; padding:10px 16px; border-radius:8px; cursor:pointer; margin:6px 4px; font-weight:bold; }
+      .link { color:#60a5fa; cursor:pointer; margin-right:12px; text-decoration:underline; }
+      .nav { margin-bottom:18px; }
+      .card { background:#020617; padding:12px; border-radius:10px; margin:10px 0; border:1px solid #1e293b; }
+      table { width:100%; border-collapse:collapse; margin-top:8px; }
+      th, td { border-bottom:1px solid #334155; padding:10px; text-align:left; }
+      th { color:#93c5fd; }
+      .small { opacity:.8; font-size:12px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav">
+        <span class="link" onclick="go('/dashboard.html')">Dashboard</span>
+        <span class="link" onclick="go('/chat.html')">Chat</span>
+        <span class="link" onclick="go('/ranking.html')">Ranking</span>
+      </div>
+      <h1>Ranking</h1>
+      <p class="small">Esta tela chama a rota <b>GET /api/users/ranking</b> do backend.</p>
+      <button class="btn" onclick="carregarRanking()">Atualizar ranking</button>
+      <div class="card">
+        <table>
+          <thead><tr><th>Posição</th><th>Usuário</th><th>Pontos</th></tr></thead>
+          <tbody id="ranking"><tr><td colspan="3">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      const API_URL = window.location.origin;
+      function go(p) { window.location.href = p; }
+      async function carregarRanking() {
+        const res = await fetch(`${API_URL}/api/users/ranking`);
+        const users = await res.json();
+        document.getElementById('ranking').innerHTML = users.map((u, i) => `
+          <tr>
+            <td>${i + 1}º</td>
+            <td>${u.name}</td>
+            <td>${u.points}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="3">Nenhum usuário cadastrado.</td></tr>';
+      }
+      carregarRanking();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,192 @@
+openapi: 3.0.3
+info:
+  title: InovaHub API
+  version: 1.0.0
+  description: API da plataforma gamificada de inovação InovaHub.
+servers:
+  - url: http://localhost:3000
+paths:
+  /health:
+    get:
+      summary: Verifica a saúde da API
+      responses:
+        '200':
+          description: API disponível
+  /api/users:
+    post:
+      summary: Cria um usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        '201':
+          description: Usuário criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Nome ou e-mail inválido
+        '409':
+          description: E-mail já cadastrado
+    get:
+      summary: Lista usuários
+      responses:
+        '200':
+          description: Lista de usuários
+  /api/users/ranking:
+    get:
+      summary: Lista ranking de usuários por pontuação
+      responses:
+        '200':
+          description: Ranking retornado
+  /api/ideas:
+    post:
+      summary: Cadastra uma ideia de inovação
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIdea'
+      responses:
+        '201':
+          description: Ideia criada
+    get:
+      summary: Lista ideias cadastradas
+      responses:
+        '200':
+          description: Lista de ideias
+  /api/ideas/{id}/status:
+    patch:
+      summary: Atualiza o status de uma ideia
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: APROVADA
+      responses:
+        '200':
+          description: Status atualizado
+  /api/missions:
+    get:
+      summary: Lista missões ativas
+      responses:
+        '200':
+          description: Lista de missões
+    post:
+      summary: Cadastra uma nova missão
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMission'
+      responses:
+        '201':
+          description: Missão cadastrada
+        '400':
+          description: Dados inválidos
+  /api/missions/{id}/complete:
+    post:
+      summary: Conclui uma missão e pontua o usuário
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Missão concluída
+        '400':
+          description: userId obrigatório
+        '404':
+          description: Usuário ou missão não encontrado
+  /api/chat:
+    post:
+      summary: Envia pergunta ao assistente de inovação
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Como participar?
+      responses:
+        '200':
+          description: Resposta do assistente
+components:
+  schemas:
+    CreateUser:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+          example: Lucas Domingues
+        email:
+          type: string
+          format: email
+          example: lucas.domingues@fiap.com.br
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        points:
+          type: integer
+    CreateMission:
+      type: object
+      required: [title, points]
+      properties:
+        title:
+          type: string
+          example: Participar de um desafio de inovação
+        points:
+          type: integer
+          example: 20
+    CreateIdea:
+      type: object
+      required: [userId, title, description]
+      properties:
+        userId:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Totem de ideias
+        description:
+          type: string
+          example: Canal rápido para colaboradores enviarem ideias.

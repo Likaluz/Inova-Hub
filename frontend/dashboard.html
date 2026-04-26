@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InovaHub - Dashboard</title>
+    <style>
+      body { font-family: Arial, sans-serif; background:#0f172a; color:#e5e7eb; margin:0; }
+      .container { max-width:1000px; margin:40px auto; padding:20px; background:#111827; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,.4); }
+      h1, h3 { margin-top:0; }
+      .btn { background:#22c55e; border:none; color:#022c22; padding:10px 16px; border-radius:8px; cursor:pointer; margin:6px 4px 6px 0; font-weight:bold; }
+      .btn:hover { background:#16a34a; }
+      .btn-secondary { background:#38bdf8; color:#082f49; }
+      .link { color:#60a5fa; cursor:pointer; margin-right:12px; text-decoration:underline; }
+      .nav { margin-bottom:18px; }
+      .card { background:#020617; padding:16px; border-radius:10px; margin:12px 0; border:1px solid #1e293b; }
+      .input, textarea { padding:10px; border-radius:8px; border:1px solid #334155; background:#020617; color:#e5e7eb; width:100%; box-sizing:border-box; margin:6px 0 12px; }
+      textarea { min-height:90px; resize:vertical; }
+      .small { opacity:.8; font-size:12px; }
+      .msg { margin-top:10px; padding:10px; border-radius:8px; display:none; }
+      .ok { background:#064e3b; display:block; }
+      .erro { background:#7f1d1d; display:block; }
+      .info { background:#1e3a8a; display:block; }
+      .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+      @media (max-width:800px) { .grid { grid-template-columns:1fr; } }
+      table { width:100%; border-collapse:collapse; margin-top:8px; }
+      th, td { border-bottom:1px solid #334155; padding:8px; text-align:left; }
+      th { color:#93c5fd; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav">
+        <span class="link" onclick="go('/dashboard.html')">Dashboard</span>
+        <span class="link" onclick="go('/chat.html')">Chat</span>
+        <span class="link" onclick="go('/ranking.html')">Ranking</span>
+      </div>
+
+      <h1>Dashboard</h1>
+      <div class="card">
+        <p>Usuário: <b id="user">Carregando...</b></p>
+        <p>ID do usuário: <b id="userId">-</b></p>
+        <p>Pontos: <b id="points">0</b></p>
+        <button id="btnAtualizar" class="btn btn-secondary" onclick="carregarDados(true)">Atualizar</button>
+        <button class="btn" onclick="sair()">Sair</button>
+        <div id="updateFeedback" class="msg"></div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Enviar ideia de inovação</h3>
+          <label>Título</label>
+          <input id="ideaTitle" class="input" placeholder="Ex.: Totem de ideias" />
+          <label>Descrição</label>
+          <textarea id="ideaDescription" placeholder="Descreva a ideia"></textarea>
+          <button class="btn" onclick="criarIdeia()">Cadastrar ideia (+10 pontos)</button>
+          <div id="ideaFeedback" class="msg"></div>
+        </div>
+
+        <div class="card">
+          <h3>Cadastrar missão</h3>
+          <label>Título da missão</label>
+          <input id="missionTitle" class="input" placeholder="Ex.: Participar de um desafio" />
+
+          <label>Pontos da missão</label>
+          <input id="missionPoints" class="input" type="number" min="1" placeholder="Ex.: 20" />
+
+          <button class="btn" onclick="criarMissao()">Cadastrar missão</button>
+          <div id="createMissionFeedback" class="msg"></div>
+
+          <hr style="border:0; border-top:1px solid #334155; margin:20px 0;">
+
+          <h3>Missões</h3>
+          <div id="missions">Carregando missões...</div>
+          <div id="missionFeedback" class="msg"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Ideias cadastradas</h3>
+        <table>
+          <thead>
+            <tr><th>Título</th><th>Usuário</th><th>Status</th><th>Data</th></tr>
+          </thead>
+          <tbody id="ideasTable"><tr><td colspan="4">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = window.location.origin;
+      const userId = localStorage.getItem('inovahubUserId');
+
+      function go(p) { window.location.href = p; }
+      function sair() { localStorage.clear(); window.location.href = '/'; }
+      function msg(id, texto, tipo = 'ok') {
+        const el = document.getElementById(id);
+        el.textContent = texto;
+        el.className = `msg ${tipo}`;
+      }
+
+      if (!userId) {
+        window.location.href = '/';
+      }
+
+      
+
+      async function carregarDados(manual = false) {
+        const botaoAtualizar = document.getElementById('btnAtualizar');
+
+        try {
+          if (botaoAtualizar) {
+            botaoAtualizar.disabled = true;
+            botaoAtualizar.textContent = 'Atualizando...';
+          }
+
+          if (manual) {
+            msg('updateFeedback', 'Atualizando dados...', 'info');
+          }
+
+          document.getElementById('userId').textContent = userId;
+
+          await carregarUsuarios();
+          await carregarMissoes();
+          await carregarIdeias();
+
+          if (manual) {
+            msg('updateFeedback', 'Dados atualizados com sucesso.');
+          }
+        } catch (erro) {
+          msg('updateFeedback', erro.message || 'Erro ao atualizar dados.', 'erro');
+        } finally {
+          if (botaoAtualizar) {
+            botaoAtualizar.disabled = false;
+            botaoAtualizar.textContent = 'Atualizar ';
+          }
+        }
+      }
+
+      async function carregarUsuarios() {
+        const res = await fetch(`${API_URL}/api/users`);
+        if (!res.ok) throw new Error('Não foi possível buscar usuários.');
+        const users = await res.json();
+        const user = users.find(u => String(u.id) === String(userId));
+        if (user) {
+          document.getElementById('user').textContent = user.name;
+          document.getElementById('points').textContent = user.points;
+          localStorage.setItem('inovahubPoints', user.points);
+        } else {
+          throw new Error('Usuário não encontrado. Faça login novamente.');
+        }
+      }
+
+
+      async function criarMissao() {
+        const title = document.getElementById('missionTitle').value.trim();
+        const points = Number(document.getElementById('missionPoints').value);
+
+        if (!title) {
+          msg('createMissionFeedback', 'Informe o título da missão.', 'erro');
+          return;
+        }
+
+        if (!points || points <= 0) {
+          msg('createMissionFeedback', 'Informe uma pontuação válida maior que zero.', 'erro');
+          return;
+        }
+
+        try {
+          const res = await fetch(`${API_URL}/api/missions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, points })
+          });
+
+          const dados = await res.json();
+
+          if (!res.ok) {
+            throw new Error(dados.error || 'Erro ao cadastrar missão.');
+          }
+
+          document.getElementById('missionTitle').value = '';
+          document.getElementById('missionPoints').value = '';
+
+          msg('createMissionFeedback', `Missão cadastrada com sucesso! ID: ${dados.id}`);
+          await carregarMissoes();
+        } catch (erro) {
+          msg('createMissionFeedback', erro.message || 'Erro ao cadastrar missão.', 'erro');
+        }
+      }
+
+      async function carregarMissoes() {
+        const res = await fetch(`${API_URL}/api/missions`);
+        if (!res.ok) throw new Error('Não foi possível buscar missões.');
+        const missions = await res.json();
+
+        const container = document.getElementById('missions');
+
+        if (!Array.isArray(missions) || missions.length === 0) {
+          container.innerHTML = '<p>Nenhuma missão ativa.</p>';
+          return;
+        }
+
+        container.innerHTML = missions.map(m => `
+          <div class="card">
+            <b>${m.title}</b><br>
+            <span class="small">Recompensa: ${m.points} pontos</span><br>
+            <button class="btn" onclick="completarMissao(${m.id})">Concluir missão</button>
+          </div>
+        `).join('');
+      }
+
+      async function completarMissao(missionId) {
+        try {
+          const res = await fetch(`${API_URL}/api/missions/${missionId}/complete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: Number(userId) })
+          });
+
+          const dados = await res.json();
+
+          if (!res.ok) {
+            throw new Error(dados.error || 'Erro ao concluir missão.');
+          }
+
+          msg('missionFeedback', `${dados.message} +${dados.pointsAdded} pontos.`);
+          await carregarDados(false);
+        } catch (erro) {
+          msg('missionFeedback', erro.message || 'Erro ao concluir missão.', 'erro');
+        }
+      }
+
+      async function criarIdeia() {
+        const title = document.getElementById('ideaTitle').value.trim();
+        const description = document.getElementById('ideaDescription').value.trim();
+        if (!title || !description) {
+          msg('ideaFeedback', 'Preencha título e descrição.', 'erro');
+          return;
+        }
+        try {
+          const res = await fetch(`${API_URL}/api/ideas`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: Number(userId), title, description })
+          });
+          const dados = await res.json();
+          if (!res.ok) throw new Error(dados.error || 'Erro ao cadastrar ideia.');
+          document.getElementById('ideaTitle').value = '';
+          document.getElementById('ideaDescription').value = '';
+          msg('ideaFeedback', 'Ideia cadastrada com sucesso. Você ganhou 10 pontos!');
+          await carregarUsuarios();
+          await carregarIdeias();
+        } catch (erro) {
+          msg('ideaFeedback', erro.message, 'erro');
+        }
+      }
+
+      async function carregarIdeias() {
+        const res = await fetch(`${API_URL}/api/ideas`);
+        if (!res.ok) throw new Error('Não foi possível buscar ideias.');
+        const ideas = await res.json();
+        document.getElementById('ideasTable').innerHTML = ideas.map(i => `
+          <tr>
+            <td>${i.title}</td>
+            <td>${i.user_name || i.user_id}</td>
+            <td>${i.status}</td>
+            <td>${new Date(i.created_at).toLocaleString('pt-BR')}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="4">Nenhuma ideia cadastrada.</td></tr>';
+      }
+
+      carregarDados(false);
+    </script>
+  </body>
+</html>
