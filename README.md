@@ -210,6 +210,7 @@ Endpoints:
 GET /api/missions
 POST /api/missions
 POST /api/missions/:id/complete
+DELETE /api/missions/:id
 ```
 
 ### Chat

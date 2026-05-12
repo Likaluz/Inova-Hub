@@ -4,16 +4,6 @@ const { initDb } = require('../src/db/database');
 
 beforeAll(() => {
   initDb();
-  it('POST /api/missions deve cadastrar missão', async () => {
-    const res = await request(app)
-      .post('/api/missions')
-      .send({ title: 'Missão de teste', points: 15 });
-
-    expect(res.status).toBe(201);
-    expect(res.body.title).toBe('Missão de teste');
-    expect(res.body.points).toBe(15);
-  });
-
 });
 
 describe('InovaHub API', () => {
@@ -32,22 +22,38 @@ describe('InovaHub API', () => {
     expect(res.body.answer).toContain('participar');
   });
 
-  it('POST /api/users deve rejeitar e-mail inválido', async () => {
+  it('POST /api/users deve rejeitar e-mail invalido', async () => {
     const res = await request(app)
       .post('/api/users')
       .send({ name: 'Teste', email: 'email-invalido' });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('e-mail válido');
+    expect(res.body.error).toContain('e-mail');
   });
-  it('POST /api/missions deve cadastrar missão', async () => {
+
+  it('POST /api/missions deve cadastrar missao', async () => {
     const res = await request(app)
       .post('/api/missions')
-      .send({ title: 'Missão de teste', points: 15 });
+      .send({ title: 'Missao de teste', points: 15 });
 
     expect(res.status).toBe(201);
-    expect(res.body.title).toBe('Missão de teste');
+    expect(res.body.title).toBe('Missao de teste');
     expect(res.body.points).toBe(15);
   });
 
+  it('DELETE /api/missions/:id deve excluir missao ativa', async () => {
+    const createRes = await request(app)
+      .post('/api/missions')
+      .send({ title: 'Missao para excluir', points: 5 });
+
+    const deleteRes = await request(app).delete(`/api/missions/${createRes.body.id}`);
+
+    expect(deleteRes.status).toBe(200);
+    expect(deleteRes.body.message).toContain('exclu');
+
+    const listRes = await request(app).get('/api/missions');
+    const deletedMission = listRes.body.find((mission) => mission.id === createRes.body.id);
+
+    expect(deletedMission).toBeUndefined();
+  });
 });

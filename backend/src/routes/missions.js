@@ -72,4 +72,23 @@ router.post('/:id/complete', async (req, res, next) => {
   }
 });
 
+router.delete('/:id', async (req, res, next) => {
+  try {
+    const mission = await get('SELECT * FROM missions WHERE id = ? AND active = 1', [req.params.id]);
+
+    if (!mission) {
+      return res.status(404).json({ error: 'Missão não encontrada.' });
+    }
+
+    await run('UPDATE missions SET active = 0 WHERE id = ?', [req.params.id]);
+
+    res.json({
+      message: 'Missão excluída.',
+      missionId: Number(req.params.id)
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

@@ -428,6 +428,18 @@ function Dashboard({ currentUser, ideas, missions, onRefresh, stats }) {
     }
   };
 
+  const deleteMission = async (missionId) => {
+    try {
+      const data = await request(`/api/missions/${missionId}`, {
+        method: 'DELETE'
+      });
+      setMissionMessage({ type: 'info', text: data.message });
+      await onRefresh();
+    } catch (error) {
+      setMissionMessage({ type: 'error', text: error.message });
+    }
+  };
+
   return (
     <div className="dashboard-grid">
       <section className="hero-strip">
@@ -515,9 +527,19 @@ function Dashboard({ currentUser, ideas, missions, onRefresh, stats }) {
                   <strong>{mission.title}</strong>
                   <span>{mission.points} pontos</span>
                 </div>
-                <button onClick={() => completeMission(mission.id)} type="button">
-                  Concluir
-                </button>
+                <div className="mission-actions">
+                  <button onClick={() => completeMission(mission.id)} type="button">
+                    Concluir
+                  </button>
+                  <button
+                    className="ghost-button danger"
+                    onClick={() => deleteMission(mission.id)}
+                    title="Excluir missão"
+                    type="button"
+                  >
+                    <Trash2 size={17} />
+                  </button>
+                </div>
               </div>
             )) : <EmptyState>Nenhuma missão ativa.</EmptyState>}
           </div>
