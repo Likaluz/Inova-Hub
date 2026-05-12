@@ -1,33 +1,33 @@
-# InovaHub
+# Inova Hub
 
-O **InovaHub** é uma plataforma web para gestão de inovação, permitindo o cadastro de usuários, registro de ideias, acompanhamento de missões, ranking de participantes e interação por chat.
+O **Inova Hub** e uma plataforma web para gestao de inovacao. O sistema permite cadastrar usuarios, registrar ideias, criar e concluir missoes, acompanhar ranking, conversar com um assistente simulado e organizar cursos em PDF ou video.
 
-Este projeto foi estruturado como uma entrega acadêmica contendo:
+Esta versao foi atualizada com um novo frontend em **React + Vite**, mantendo o backend em **Node.js + Express + SQLite**.
 
-- Documentação Swagger das APIs
-- Esqueleto funcional da solução
-- Integração com banco de dados SQLite
-- Frontend integrado ao backend
-- README com instruções de execução
-- Diagramas C4 níveis 1, 2 e 3 que estão localizados na pasta docs (-[Nível 1 - Contexto](docs/c4/nivel-1-contexto.md) - [Nível 2 - Containers](docs/c4/nivel-2-container.md) - [Nível 3 - Componentes](docs/c4/nivel-3-componentes.md))
-- Testes unitários e de integração
+## Funcionalidades
 
----
+- Cadastro de usuarios com nome e e-mail.
+- Login simples por ID do usuario.
+- Dashboard com dados do participante, pontuacao, ideias e missoes.
+- Cadastro de ideias de inovacao com ganho de pontos.
+- Cadastro e conclusao de missoes.
+- Ranking de usuarios por pontuacao.
+- Chat com resposta automatica.
+- Aba de cursos com materiais em PDF ou video.
+- Documentacao Swagger das APIs.
+- Testes automatizados do backend.
+- Diagramas C4 em `docs/c4`.
 
-## 1. Objetivo do projeto
+## Tecnologias
 
-O objetivo do InovaHub é oferecer uma base funcional para uma plataforma de inovação corporativa ou acadêmica, onde usuários possam:
+### Frontend
 
-- Criar cadastro informando nome e e-mail
-- Registrar ideias de inovação
-- Visualizar e concluir missões
-- Ganhar pontuação por participação
-- Consultar ranking de usuários
-- Enviar mensagens no chat da plataforma
-
----
-
-## 2. Tecnologias utilizadas
+- React
+- Vite
+- CSS
+- Lucide React
+- Fetch API
+- LocalStorage para a biblioteca de cursos
 
 ### Backend
 
@@ -38,249 +38,125 @@ O objetivo do InovaHub é oferecer uma base funcional para uma plataforma de ino
 - YAMLJS
 - CORS
 
-### Frontend
-
-- HTML
-- CSS
-- JavaScript
-- Integração via Fetch API
-
 ### Testes
 
 - Vitest
 - Supertest
 
----
-
-## 3. Estrutura do projeto
+## Estrutura do projeto
 
 ```text
-inovahub_entrega/
-│
-├── backend/
-│   ├── database/
-│   │   └── db.js
-│   │
-│   ├── routes/
-│   │   ├── users.js
-│   │   ├── ideas.js
-│   │   ├── missions.js
-│   │   └── chat.js
-│   │
-│   ├── services/
-│   │   └── chatService.js
-│   │
-│   ├── tests/
-│   │   ├── api.test.js
-│   │   └── chatService.test.js
-│   │
-│   ├── app.js
-│   ├── server.js
-│   └── package.json
-│
-├── frontend/
-│   ├── index.html
-│   ├── dashboard.html
-│   ├── style.css
-│   └── app.js
-│
-├── docs/
-│   ├── c4-nivel-1-contexto.md
-│   ├── c4-nivel-2-container.md
-│   └── c4-nivel-3-componentes.md
-│
-├── swagger.yaml
-├── package.json
-└── README.md
+Inova-Hub/
+|-- backend/
+|   |-- src/
+|   |   |-- app.js
+|   |   |-- server.js
+|   |   |-- db/
+|   |   |   `-- database.js
+|   |   |-- routes/
+|   |   |   |-- chat.js
+|   |   |   |-- ideas.js
+|   |   |   |-- missions.js
+|   |   |   `-- users.js
+|   |   `-- services/
+|   |       `-- chatService.js
+|   |-- tests/
+|   |   |-- api.test.js
+|   |   `-- chatService.test.js
+|   |-- package.json
+|   `-- swagger.yaml
+|-- frontend/
+|   |-- index.html
+|   |-- package.json
+|   |-- src/
+|   |   |-- App.jsx
+|   |   |-- main.jsx
+|   |   `-- styles.css
+|   `-- dist/
+|-- docs/
+|   `-- c4/
+|-- package.json
+|-- README.md
+`-- README-REACT.md
 ```
 
----
+## Como executar
 
-## 4. Módulos da solução
-
-O projeto possui um esqueleto funcional com os principais módulos da solução.
-
-### 4.1 Cadastro de usuários
-
-Permite cadastrar usuários com nome e e-mail.
-
-Funcionalidades:
-
-- Validação de nome obrigatório
-- Validação de e-mail em formato válido
-- Bloqueio de e-mails duplicados
-- Integração com banco SQLite
-
-Endpoint principal:
-
-```text
-POST /api/users
-```
-
-Exemplo de requisição:
-
-```json
-{
-  "name": "Lucas Domingues",
-  "email": "lucas@email.com"
-}
-```
-
----
-
-### 4.2 Gestão de ideias
-
-Permite cadastrar e listar ideias de inovação enviadas pelos usuários.
-
-Funcionalidades:
-
-- Cadastro de título da ideia
-- Cadastro de descrição
-- Associação da ideia a um usuário
-- Consulta das ideias cadastradas
-
-Endpoints principais:
-
-```text
-GET /api/ideas
-POST /api/ideas
-```
-
----
-
-### 4.3 Missões
-
-Permite cadastrar missões, visualizar missões disponíveis e registrar a conclusão de atividades.
-
-Funcionalidades:
-
-- Cadastro de novas missões
-- Listagem de missões disponíveis
-- Conclusão de missão
-- Atribuição de pontos ao usuário
-
-Endpoints principais:
-
-```text
-GET /api/missions
-POST /api/missions
-POST /api/missions/{id}/complete
-```
-
----
-
-### 4.4 Chat
-
-Permite enviar mensagens e receber respostas simuladas da plataforma.
-
-Funcionalidades:
-
-- Envio de mensagens
-- Resposta automática do sistema
-- Serviço separado para regra de resposta
-
-Endpoint principal:
-
-```text
-POST /api/chat
-```
-
----
-
-### 4.5 Ranking e relatórios
-
-Permite visualizar a pontuação dos usuários cadastrados.
-
-Funcionalidades:
-
-- Listagem de usuários
-- Ordenação por pontuação
-- Apoio à visualização de desempenho dos participantes
-
-Endpoint principal:
-
-```text
-GET /api/users/ranking
-```
-
----
-
-## 5. Como executar o projeto
-
-### 5.1 Pré-requisitos
-
-Antes de executar o projeto, é necessário ter instalado:
+### Pre-requisitos
 
 - Node.js
 - npm
 
-Para verificar se estão instalados, execute:
+Verifique as versoes instaladas:
 
 ```bash
 node -v
 npm -v
 ```
 
----
+### Instalar dependencias
 
-### 5.2 Instalar dependências
-
-Na pasta raiz do projeto, execute:
+Na pasta raiz do projeto:
 
 ```bash
 npm install
 ```
 
-Esse comando instala as dependências principais e também as dependências do backend.
+Esse comando instala as dependencias da raiz, do backend e do frontend.
 
----
-
-### 5.3 Executar a aplicação
-
-Na pasta raiz do projeto, execute:
+### Rodar a aplicacao completa
 
 ```bash
 npm start
 ```
 
-Após iniciar, o sistema ficará disponível em:
+O comando executa o build do React e inicia o backend Express.
+
+Acesse:
 
 ```text
 http://localhost:3000
 ```
 
-O frontend é servido automaticamente pelo backend Express.  
-Portanto, não é necessário abrir o arquivo `frontend/index.html` manualmente nem utilizar Live Server.
+## Desenvolvimento
 
----
+Rodar apenas o frontend com hot reload:
 
-## 6. URLs principais
-
-### Frontend
-
-```text
-http://localhost:3000
+```bash
+npm run dev
 ```
 
-### Dashboard
+Rodar apenas a API em modo desenvolvimento:
 
-```text
-http://localhost:3000/dashboard
+```bash
+npm run dev:api
 ```
 
-### Swagger
+Gerar build do frontend:
 
-```text
-http://localhost:3000/api-docs
+```bash
+npm run build
 ```
 
-### Health check da API
+Executar testes:
 
-```text
-http://localhost:3000/health
+```bash
+npm test
 ```
 
-Resposta esperada:
+## URLs principais
+
+```text
+Frontend:    http://localhost:3000
+Dashboard:   http://localhost:3000/dashboard
+Cursos:      http://localhost:3000/courses
+Chat:        http://localhost:3000/chat
+Ranking:     http://localhost:3000/ranking
+Swagger:     http://localhost:3000/api-docs
+Health API:  http://localhost:3000/health
+```
+
+Resposta esperada do health check:
 
 ```json
 {
@@ -289,121 +165,21 @@ Resposta esperada:
 }
 ```
 
----
+## Modulos da aplicacao
 
-## 7. Documentação Swagger
+### Usuarios
 
-A documentação Swagger está disponível em:
+Permite criar usuarios e consultar participantes cadastrados.
 
-```text
-http://localhost:3000/api-docs
-```
-
-Nela é possível consultar e testar os contratos das APIs, incluindo:
-
-- Usuários
-- Ideias
-- Missões
-- Chat
-- Ranking
-
-O arquivo de configuração do Swagger está localizado em:
+Endpoints:
 
 ```text
-swagger.yaml
+GET /api/users
+POST /api/users
+GET /api/users/ranking
 ```
 
----
-
-## 8. Banco de dados
-
-O projeto utiliza **SQLite** como banco de dados local.
-
-A integração com banco contempla:
-
-- Criação de usuários
-- Validação de e-mails duplicados
-- Cadastro e consulta de ideias
-- Controle de pontuação dos usuários
-- Consulta de ranking
-
-O banco é inicializado automaticamente ao executar o projeto.
-
-Arquivo principal de configuração:
-
-```text
-backend/database/db.js
-```
-
----
-
-## 9. Como testar pelo frontend
-
-1. Execute o projeto:
-
-```bash
-npm start
-```
-
-2. Acesse:
-
-```text
-http://localhost:3000
-```
-
-3. Preencha os dados de entrada:
-
-```text
-Nome: Lucas Domingues
-E-mail: lucas@email.com
-```
-
-4. Clique em **Entrar**.
-
-5. No dashboard, teste as funcionalidades:
-
-- Atualizar dados do usuário
-- Cadastrar uma ideia
-- Listar ideias
-- Visualizar missões
-- Cadastrar novas missões
-- Concluir missão
-- Enviar mensagem no chat
-- Visualizar ranking
-
-Observação: o campo de e-mail aceita apenas valores em formato válido, como:
-
-```text
-usuario@email.com
-```
-
-Valores inválidos, como `lucas`, `teste`, `123` ou `email.com`, devem ser recusados.
-
----
-
-## 10. Como testar pelo Swagger
-
-1. Execute o projeto:
-
-```bash
-npm start
-```
-
-2. Acesse:
-
-```text
-http://localhost:3000/api-docs
-```
-
-3. Abra o endpoint desejado.
-
-4. Clique em **Try it out**.
-
-5. Preencha o corpo da requisição.
-
-6. Clique em **Execute**.
-
-Exemplo para criar usuário:
+Exemplo de criacao:
 
 ```json
 {
@@ -412,126 +188,128 @@ Exemplo para criar usuário:
 }
 ```
 
-Se o e-mail já existir no banco, utilize outro e-mail para teste, por exemplo:
-
-```json
-{
-  "name": "Lucas Teste",
-  "email": "lucas2@email.com"
-}
-```
-
----
-
-## 11. Executar testes
-
-Para executar os testes, rode o comando abaixo na pasta raiz:
-
-```bash
-npm test
-```
-
-O comando executa os testes do backend utilizando Vitest.
-
-Resultado esperado:
-
-```text
-Test Files  passed
-Tests       passed
-```
-
-Os testes contemplam:
-
-- Testes unitários do serviço de chat
-- Testes de integração das APIs
-- Validação de criação de usuário
-- Validação de endpoints principais
-
----
-
-## 12. Diagramas C4
-
-Os diagramas C4 da solução estão disponíveis na pasta:
-
-```text
-docs/
-```
-
-Arquivos:
-
-```text
-docs/c4-nivel-1-contexto.md
-docs/c4-nivel-2-container.md
-docs/c4-nivel-3-componentes.md
-```
-
-### Nível 1 — Contexto
-
-Mostra a visão geral da solução, seus usuários e sistemas externos.
-
-### Nível 2 — Containers
-
-Mostra os principais blocos da aplicação:
-
-- Frontend
-- Backend API
-- Banco de dados SQLite
-- Swagger
-
-### Nível 3 — Componentes
-
-Mostra a organização interna do backend, incluindo:
-
-- Rotas
-- Serviços
-- Banco de dados
-- Testes
-
----
-
-## 13. Endpoints principais da API
-
-### Usuários
-
-```text
-GET /api/users
-POST /api/users
-GET /api/users/ranking
-```
-
 ### Ideias
+
+Permite cadastrar e listar ideias de inovacao. Ao cadastrar uma ideia, o usuario ganha 10 pontos.
+
+Endpoints:
 
 ```text
 GET /api/ideas
 POST /api/ideas
+PATCH /api/ideas/:id/status
 ```
 
-### Missões
+### Missoes
+
+Permite criar missoes, listar missoes ativas e concluir uma missao para somar pontos ao usuario.
+
+Endpoints:
 
 ```text
 GET /api/missions
 POST /api/missions
-POST /api/missions/{id}/complete
+POST /api/missions/:id/complete
 ```
 
 ### Chat
+
+Permite enviar mensagens para o assistente simulado do Inova Hub.
+
+Endpoint:
 
 ```text
 POST /api/chat
 ```
 
-### Sistema
+### Cursos
+
+A aba de cursos fica no frontend em React. Ela permite cadastrar materiais por link, marcando cada item como PDF ou video.
+
+Os cursos sao salvos no `localStorage` do navegador, usando a chave:
 
 ```text
-GET /health
-GET /api-docs
+inovahubCourses
 ```
 
----
+Essa funcionalidade nao depende de endpoint no backend na versao atual.
 
-## 14. Exemplos de uso da API
+## Como testar pelo frontend
 
-### Criar usuário
+1. Execute `npm start`.
+2. Acesse `http://localhost:3000`.
+3. Crie um usuario informando nome e e-mail.
+4. Guarde o ID retornado ou entre automaticamente no painel.
+5. No dashboard, cadastre ideias e missoes.
+6. Acesse a aba Cursos para adicionar PDFs ou videos.
+7. Acesse Chat para testar o assistente.
+8. Acesse Ranking para consultar a pontuacao dos usuarios.
+
+## Como testar pelo Swagger
+
+1. Execute `npm start`.
+2. Acesse `http://localhost:3000/api-docs`.
+3. Abra o endpoint desejado.
+4. Clique em `Try it out`.
+5. Preencha os dados.
+6. Clique em `Execute`.
+
+## Banco de dados
+
+O projeto usa SQLite local. O banco e inicializado automaticamente pelo backend e armazena:
+
+- usuarios;
+- ideias;
+- missoes;
+- pontuacao dos usuarios.
+
+Arquivo principal:
+
+```text
+backend/src/db/database.js
+```
+
+## Testes
+
+Execute:
+
+```bash
+npm test
+```
+
+A suite atual cobre:
+
+- servico de chat;
+- endpoints principais da API;
+- criacao de usuario;
+- validacoes basicas de integracao.
+
+Resultado esperado:
+
+```text
+Test Files  2 passed
+Tests       6 passed
+```
+
+## Diagramas C4
+
+Os diagramas ficam em:
+
+```text
+docs/c4/
+```
+
+Arquivos:
+
+```text
+docs/c4/nivel-1-contexto.md
+docs/c4/nivel-2-container.md
+docs/c4/nivel-3-componentes.md
+```
+
+## Exemplos de API
+
+Criar usuario:
 
 ```bash
 curl -X POST http://localhost:3000/api/users ^
@@ -539,19 +317,19 @@ curl -X POST http://localhost:3000/api/users ^
   -d "{\"name\":\"Lucas Domingues\",\"email\":\"lucas@email.com\"}"
 ```
 
-### Listar usuários
+Listar usuarios:
 
 ```bash
 curl http://localhost:3000/api/users
 ```
 
-### Consultar ranking
+Consultar ranking:
 
 ```bash
 curl http://localhost:3000/api/users/ranking
 ```
 
-### Enviar mensagem ao chat
+Enviar mensagem ao chat:
 
 ```bash
 curl -X POST http://localhost:3000/api/chat ^
@@ -559,7 +337,9 @@ curl -X POST http://localhost:3000/api/chat ^
   -d "{\"message\":\"Como cadastrar uma ideia?\"}"
 ```
 
----
+## Observacoes
 
-
-
+- O frontend antigo em HTML estatico foi substituido por React.
+- O backend serve o build final de `frontend/dist`.
+- Para refletir mudancas do frontend no modo producao, rode `npm run build` antes de iniciar o backend.
+- A biblioteca de cursos e local ao navegador, pois utiliza `localStorage`.
