@@ -144,6 +144,34 @@ Executar testes:
 npm test
 ```
 
+## GitHub Pages
+
+O projeto esta preparado para publicar o frontend React no GitHub Pages usando GitHub Actions.
+
+Arquivos usados para o deploy:
+
+```text
+.github/workflows/pages.yml
+frontend/package.json
+```
+
+Como publicar:
+
+1. Crie um repositorio no GitHub.
+2. Envie este projeto para o repositorio.
+3. No GitHub, abra `Settings > Pages`.
+4. Em `Build and deployment`, selecione `GitHub Actions`.
+5. Faca push na branch `main` ou `master`.
+6. Aguarde a action `Deploy GitHub Pages` finalizar.
+
+Depois do deploy, o site ficara disponivel em uma URL parecida com:
+
+```text
+https://seu-usuario.github.io/nome-do-repositorio/
+```
+
+No GitHub Pages o backend Express e o banco SQLite nao rodam, porque Pages hospeda apenas arquivos estaticos. Para manter o site utilizavel nesse ambiente, o frontend entra em modo estatico e salva usuarios, ideias, missoes e cursos no `localStorage` do navegador.
+
 ## URLs principais
 
 ```text

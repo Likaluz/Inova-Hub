@@ -11,5 +11,8 @@
     "dev": "npm --prefix frontend run dev",
     "dev:api": "npm --prefix backend run dev",
     "test": "npm --prefix backend test"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }

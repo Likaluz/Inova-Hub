@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 
 const API_URL = window.location.origin;
+const STATIC_MODE = !['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 
 const navItems = [
   { id: 'dashboard', label: 'Painel', icon: Rocket },
@@ -31,6 +32,11 @@ const navItems = [
 ];
 
 function getInitialRoute() {
+  if (STATIC_MODE) {
+    const hashRoute = window.location.hash.replace('#/', '').replace('#', '');
+    if (['dashboard', 'courses', 'chat', 'ranking'].includes(hashRoute)) return hashRoute;
+  }
+
   const path = window.location.pathname.replace('/', '');
   if (['dashboard', 'courses', 'chat', 'ranking'].includes(path)) return path;
   return localStorage.getItem('inovahubUserId') ? 'dashboard' : 'home';
@@ -65,7 +71,198 @@ function loadCourses() {
   }
 }
 
+function readJsonStorage(key, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJsonStorage(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function ensureStaticSeed() {
+  if (!localStorage.getItem('inovahubStaticUsers')) {
+    writeJsonStorage('inovahubStaticUsers', []);
+  }
+
+  if (!localStorage.getItem('inovahubStaticIdeas')) {
+    writeJsonStorage('inovahubStaticIdeas', []);
+  }
+
+  if (!localStorage.getItem('inovahubStaticMissions')) {
+    writeJsonStorage('inovahubStaticMissions', [
+      {
+        id: 1,
+        title: 'Enviar uma ideia de inovação',
+        points: 10,
+        active: 1
+      }
+    ]);
+  }
+}
+
+function chatAnswer(message) {
+  const text = message.toLowerCase();
+
+  if (text.includes('ideia')) {
+    return 'Para cadastrar uma ideia, acesse o painel, preencha título e descrição e envie. Cada ideia soma 10 pontos.';
+  }
+
+  if (text.includes('miss')) {
+    return 'As missões ficam no dashboard. Você pode concluir uma missão para ganhar pontos ou criar novas atividades.';
+  }
+
+  if (text.includes('curso') || text.includes('pdf') || text.includes('video')) {
+    return 'Na aba Cursos, você pode adicionar materiais em PDF ou vídeo por link e abrir cada conteúdo em uma nova guia.';
+  }
+
+  return 'Você pode participar cadastrando ideias, concluindo missões, acompanhando o ranking e estudando os cursos disponíveis.';
+}
+
+async function staticRequest(path, options = {}) {
+  ensureStaticSeed();
+
+  const method = options.method || 'GET';
+  const body = options.body ? JSON.parse(options.body) : {};
+  const users = readJsonStorage('inovahubStaticUsers', []);
+  const ideas = readJsonStorage('inovahubStaticIdeas', []);
+  const missions = readJsonStorage('inovahubStaticMissions', []);
+
+  if (path === '/api/users' && method === 'GET') {
+    return [...users].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }
+
+  if (path === '/api/users' && method === 'POST') {
+    const name = body.name?.trim();
+    const email = body.email?.trim().toLowerCase();
+
+    if (!name) throw new Error('Nome é obrigatório.');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      throw new Error('Digite um e-mail válido.');
+    }
+    if (users.some((user) => user.email === email)) {
+      throw new Error('Este e-mail já está cadastrado.');
+    }
+
+    const user = {
+      id: users.reduce((max, item) => Math.max(max, item.id), 0) + 1,
+      name,
+      email,
+      points: 0,
+      created_at: new Date().toISOString()
+    };
+    writeJsonStorage('inovahubStaticUsers', [user, ...users]);
+    return user;
+  }
+
+  if (path === '/api/ideas' && method === 'GET') {
+    return ideas
+      .map((idea) => ({
+        ...idea,
+        user_name: users.find((user) => user.id === idea.user_id)?.name || idea.user_id
+      }))
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }
+
+  if (path === '/api/ideas' && method === 'POST') {
+    if (!body.userId || !body.title || !body.description) {
+      throw new Error('userId, title e description são obrigatórios.');
+    }
+
+    const idea = {
+      id: ideas.reduce((max, item) => Math.max(max, item.id), 0) + 1,
+      user_id: Number(body.userId),
+      title: body.title,
+      description: body.description,
+      status: 'ENVIADA',
+      created_at: new Date().toISOString()
+    };
+    writeJsonStorage('inovahubStaticIdeas', [idea, ...ideas]);
+    writeJsonStorage(
+      'inovahubStaticUsers',
+      users.map((user) => user.id === Number(body.userId) ? { ...user, points: Number(user.points || 0) + 10 } : user)
+    );
+    return idea;
+  }
+
+  if (path === '/api/missions' && method === 'GET') {
+    return missions.filter((mission) => mission.active === 1).sort((a, b) => a.id - b.id);
+  }
+
+  if (path === '/api/missions' && method === 'POST') {
+    const title = body.title?.trim();
+    const points = Number(body.points);
+
+    if (!title) throw new Error('Título da missão é obrigatório.');
+    if (!Number.isInteger(points) || points <= 0) {
+      throw new Error('Pontos da missão devem ser um número inteiro maior que zero.');
+    }
+
+    const mission = {
+      id: missions.reduce((max, item) => Math.max(max, item.id), 0) + 1,
+      title,
+      points,
+      active: 1
+    };
+    writeJsonStorage('inovahubStaticMissions', [...missions, mission]);
+    return mission;
+  }
+
+  const completeMatch = path.match(/^\/api\/missions\/(\d+)\/complete$/);
+  if (completeMatch && method === 'POST') {
+    const missionId = Number(completeMatch[1]);
+    const mission = missions.find((item) => item.id === missionId && item.active === 1);
+
+    if (!mission) throw new Error('Missão não encontrada.');
+
+    const updatedUsers = users.map((user) =>
+      user.id === Number(body.userId) ? { ...user, points: Number(user.points || 0) + mission.points } : user
+    );
+    const updatedUser = updatedUsers.find((user) => user.id === Number(body.userId));
+    writeJsonStorage('inovahubStaticUsers', updatedUsers);
+
+    return {
+      message: 'Missão concluída.',
+      pointsAdded: mission.points,
+      user: updatedUser
+    };
+  }
+
+  const deleteMatch = path.match(/^\/api\/missions\/(\d+)$/);
+  if (deleteMatch && method === 'DELETE') {
+    const missionId = Number(deleteMatch[1]);
+    const mission = missions.find((item) => item.id === missionId && item.active === 1);
+
+    if (!mission) throw new Error('Missão não encontrada.');
+
+    writeJsonStorage(
+      'inovahubStaticMissions',
+      missions.map((item) => item.id === missionId ? { ...item, active: 0 } : item)
+    );
+
+    return {
+      message: 'Missão excluída.',
+      missionId
+    };
+  }
+
+  if (path === '/api/chat' && method === 'POST') {
+    if (!body.message) throw new Error('Mensagem é obrigatória.');
+    return { answer: chatAnswer(body.message) };
+  }
+
+  throw new Error('Recurso não disponível no modo GitHub Pages.');
+}
+
 async function request(path, options) {
+  if (STATIC_MODE) {
+    return staticRequest(path, options);
+  }
+
   const response = await fetch(`${API_URL}${path}`, options);
   const data = await response.json().catch(() => null);
 
@@ -98,6 +295,12 @@ function App() {
 
   const navigate = (nextRoute) => {
     setRoute(nextRoute);
+
+    if (STATIC_MODE) {
+      window.location.hash = nextRoute === 'home' ? '' : `/${nextRoute}`;
+      return;
+    }
+
     const path = nextRoute === 'home' ? '/' : `/${nextRoute}`;
     window.history.pushState({}, '', path);
   };
@@ -126,8 +329,13 @@ function App() {
 
   useEffect(() => {
     const onPopState = () => setRoute(getInitialRoute());
+    const onHashChange = () => setRoute(getInitialRoute());
     window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
+    window.addEventListener('hashchange', onHashChange);
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+      window.removeEventListener('hashchange', onHashChange);
+    };
   }, []);
 
   useEffect(() => {
